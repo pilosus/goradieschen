@@ -32,3 +32,6 @@ go.work.sum
 .vscode/
 *~
 
+# Local files with snippets and help
+DEV.md
+scratch.go
