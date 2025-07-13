@@ -42,6 +42,15 @@ func ParseCommand(command string, store *store.Store) string {
 			return ReturnOK
 		}
 		return ReturnNil
+	case "KEYS":
+		if len(parts) != 2 {
+			return GenericErrorPrefix + " usage: KEYS pattern"
+		}
+		val, ok := store.Match(parts[1])
+		if !ok {
+			return ReturnNil
+		}
+		return val
 	default:
 		return GenericErrorPrefix + " unknown command: " + parts[0]
 	}

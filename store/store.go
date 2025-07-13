@@ -1,6 +1,10 @@
 package store
 
-import "sync"
+import (
+	"path/filepath"
+	"strings"
+	"sync"
+)
 
 type Store struct {
 	mu   sync.RWMutex
@@ -22,6 +26,22 @@ func (s *Store) Get(key string) (string, bool) {
 	defer s.mu.RUnlock()
 	value, ok := s.data[key]
 	return value, ok
+}
+
+func (s *Store) Match(pattern string) (string, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	var found []string
+	for key := range s.data {
+		matched, _ := filepath.Match(pattern, key)
+		if matched {
+			found = append(found, key)
+		}
+	}
+	if len(found) == 0 {
+		return "", false
+	}
+	return strings.Join(found, "\n"), true
 }
 
 func (s *Store) Delete(key string) bool {
