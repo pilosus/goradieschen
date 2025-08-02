@@ -2,14 +2,15 @@
 
 ![Go Radieschen Logo](https://github.com/pilosus/goradieschen/blob/main/assets/logo_150px.png?raw=true)
 
-Key-value store for Go with Redis-like API.
+Redis-like key-value store written in Go
 
 ## Features
 
+- Implements Redis Serialization Protocol (RESP2)
 - Simple key-value store
 - Key expiration
 - Subset of Redis commands
-- RESP2 protocol support
+
 
 ## Usage
 
