@@ -153,6 +153,18 @@ func (s *TTLStore) Stop() {
 	close(s.stop)
 }
 
+func (s *TTLStore) FlushAll() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// Clear the heap
+	s.heap = TTLHeap{}
+	heap.Init(&s.heap)
+
+	// Clear the entries map
+	s.entries = make(map[string]*TTLItem)
+}
+
 // NewTTLStore creates a new TTL scheduler
 func NewTTLStore(ctx context.Context, deleteFn func(key string)) *TTLStore {
 	s := &TTLStore{
