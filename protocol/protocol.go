@@ -87,6 +87,8 @@ func ParseCommand(command string, store *store.Store, ttl *ttlstore.TTLStore) st
 			return "0" // Key has expired
 		}
 		return strconv.FormatFloat(remaining, 'f', 0, 64) // Return remaining seconds as integer
+	case "PING":
+		return "PONG"
 	default:
 		return GenericErrorPrefix + " unknown command: " + parts[0]
 	}
