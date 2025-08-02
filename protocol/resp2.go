@@ -9,9 +9,8 @@ import (
 	"strings"
 )
 
-// DecodeCommand decodes a RESP2 command string from a client into the command name and its arguments.
-func DecodeCommand(encodedCommand string) (string, []string, error) {
-	r := bufio.NewReader(strings.NewReader(encodedCommand))
+// DecodeCommand decodes a RESP2 command from a bufio.Reader into the command name and its arguments.
+func DecodeCommand(r *bufio.Reader) (string, []string, error) {
 
 	line, err := readLine(r)
 	if err != nil {

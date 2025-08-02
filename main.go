@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"github.com/pilosus/goradieschen/protocol"
 	"github.com/pilosus/goradieschen/server"
@@ -32,8 +33,8 @@ func main() {
 		})
 	defer ttl.Stop()
 
-	err := server.Start(ctx, ":6380", func(command string) string {
-		return protocol.ParseCommand(command, s, ttl)
+	err := server.Start(ctx, ":6380", func(reader *bufio.Reader) string {
+		return protocol.ParseCommand(reader, s, ttl)
 	})
 	if err != nil {
 		log.Fatal(err)

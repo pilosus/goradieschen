@@ -1,6 +1,7 @@
 package protocol
 
 import (
+	"bufio"
 	"strings"
 	"testing"
 )
@@ -112,7 +113,8 @@ func TestDecodeCommand(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd, args, err := DecodeCommand(tt.input)
+			reader := bufio.NewReader(strings.NewReader(tt.input))
+		cmd, args, err := DecodeCommand(reader)
 
 			if tt.expectedError != "" {
 				if err == nil {
@@ -149,7 +151,8 @@ func TestDecodeCommand(t *testing.T) {
 func TestDecodeCommandEdgeCases(t *testing.T) {
 	t.Run("Single character command", func(t *testing.T) {
 		input := "*1\r\n$1\r\nX\r\n"
-		cmd, args, err := DecodeCommand(input)
+		reader := bufio.NewReader(strings.NewReader(input))
+	cmd, args, err := DecodeCommand(reader)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -163,7 +166,8 @@ func TestDecodeCommandEdgeCases(t *testing.T) {
 
 	t.Run("Command with special characters", func(t *testing.T) {
 		input := "*3\r\n$3\r\nSET\r\n$7\r\nkey:123\r\n$10\r\nvalue@#$%^\r\n"
-		cmd, args, err := DecodeCommand(input)
+		reader := bufio.NewReader(strings.NewReader(input))
+	cmd, args, err := DecodeCommand(reader)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -184,7 +188,8 @@ func TestDecodeCommandEdgeCases(t *testing.T) {
 	t.Run("Large number of arguments", func(t *testing.T) {
 		// MSET key1 val1 key2 val2 key3 val3
 		input := "*7\r\n$4\r\nMSET\r\n$4\r\nkey1\r\n$4\r\nval1\r\n$4\r\nkey2\r\n$4\r\nval2\r\n$4\r\nkey3\r\n$4\r\nval3\r\n"
-		cmd, args, err := DecodeCommand(input)
+		reader := bufio.NewReader(strings.NewReader(input))
+	cmd, args, err := DecodeCommand(reader)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}

@@ -5,10 +5,9 @@ import (
 	"context"
 	"log"
 	"net"
-	"strings"
 )
 
-func Start(ctx context.Context, addr string, handler func(string) string) error {
+func Start(ctx context.Context, addr string, handler func(*bufio.Reader) string) error {
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err
@@ -19,7 +18,9 @@ func Start(ctx context.Context, addr string, handler func(string) string) error 
 	go func() {
 		<-ctx.Done()
 		log.Println("Server shutdown initiated")
-		ln.Close() // this unblocks Accept()
+		if err := ln.Close(); err != nil {
+			log.Printf("Error closing listener: %s", err)
+		}
 	}()
 
 	for {
@@ -37,19 +38,25 @@ func Start(ctx context.Context, addr string, handler func(string) string) error 
 	}
 }
 
-func handleConnection(conn net.Conn, handler func(string) string) {
-	defer conn.Close()
+func handleConnection(conn net.Conn, handler func(*bufio.Reader) string) {
+	defer func() {
+		if err := conn.Close(); err != nil {
+			log.Printf("Error closing connection: %s", err)
+		}
+	}()
 
 	log.Printf("Client connected: %s", conn.RemoteAddr())
 	reader := bufio.NewReader(conn)
 
 	for {
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			log.Printf("Connection closed: %s", err)
+		response := handler(reader)
+		if response == "" {
+			log.Printf("Connection closed by handler")
 			return
 		}
-		response := handler(strings.TrimSpace(line)) + "\n"
-		conn.Write([]byte(response))
+		if _, err := conn.Write([]byte(response)); err != nil {
+			log.Printf("Write error: %s", err)
+			return
+		}
 	}
 }

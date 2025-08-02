@@ -2,7 +2,6 @@ package store
 
 import (
 	"path/filepath"
-	"strings"
 	"sync"
 )
 
@@ -28,7 +27,7 @@ func (s *Store) Get(key string) (string, bool) {
 	return value, ok
 }
 
-func (s *Store) Match(pattern string) (string, bool) {
+func (s *Store) Match(pattern string) ([]string, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	var found []string
@@ -39,9 +38,9 @@ func (s *Store) Match(pattern string) (string, bool) {
 		}
 	}
 	if len(found) == 0 {
-		return "", false
+		return found, false
 	}
-	return strings.Join(found, "\n"), true
+	return found, true
 }
 
 func (s *Store) Delete(key string) bool {
