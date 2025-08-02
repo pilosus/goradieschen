@@ -2,24 +2,36 @@ package server
 
 import (
 	"bufio"
+	"context"
 	"log"
 	"net"
 	"strings"
 )
 
-func Start(addr string, handler func(string) string) error {
+func Start(ctx context.Context, addr string, handler func(string) string) error {
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err
 	}
-	defer ln.Close()
 
 	log.Printf("Server is listening on port: %s", addr)
+
+	go func() {
+		<-ctx.Done()
+		log.Println("Server shutdown initiated")
+		ln.Close() // this unblocks Accept()
+	}()
+
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
-			log.Printf("Connection accept error: %s", err)
-			continue
+			select {
+			case <-ctx.Done():
+				return nil // graceful shutdown
+			default:
+				log.Println("Accept error:", err)
+				continue
+			}
 		}
 		go handleConnection(conn, handler)
 	}
