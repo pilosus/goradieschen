@@ -87,6 +87,13 @@ func ParseCommand(command string, store *store.Store, ttl *ttlstore.TTLStore) st
 			return "0" // Key has expired
 		}
 		return strconv.FormatFloat(remaining, 'f', 0, 64) // Return remaining seconds as integer
+	case "FLUSHALL":
+		if len(parts) != 1 {
+			return GenericErrorPrefix + " usage: FLUSHALL"
+		}
+		store.FlushAll()
+		ttl.FlushAll()
+		return ReturnOK
 	case "PING":
 		return "PONG"
 	default:

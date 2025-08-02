@@ -51,3 +51,9 @@ func (s *Store) Delete(key string) bool {
 	delete(s.data, key)
 	return existed
 }
+
+func (s *Store) FlushAll() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.data = make(map[string]string)
+}
